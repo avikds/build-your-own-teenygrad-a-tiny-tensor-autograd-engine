@@ -153,8 +153,30 @@ def permute(self, order):
     # Return a new LazyBuffer with axes reordered according to order.
     return LazyBuffer(self._np.transpose(order))
 
-# Step 13 - Function (not yet solved)
-# TODO: implement
+# Step 13 - Function
+class Function:
+    def __init__(self, *tensors):
+        # Record whether each input tensor requires gradients.
+        self.needs_input_grad = [tensor.requires_grad for tensor in tensors]
+
+        # Preserve None distinctly from False:
+        # True if any input requires grad,
+        # None if no input is True but at least one is None,
+        # otherwise False.
+        if any(need is True for need in self.needs_input_grad):
+            self.requires_grad = True
+        elif any(need is None for need in self.needs_input_grad):
+            self.requires_grad = None
+        else:
+            self.requires_grad = False
+
+        # Only keep parent references when gradients will flow.
+        if self.requires_grad:
+            self.parents = tuple(
+                tensor
+                for tensor, need in zip(tensors, self.needs_input_grad)
+                if need is True
+            )
 
 # Step 14 - function_forward_backward_stubs (not yet solved)
 # TODO: implement
