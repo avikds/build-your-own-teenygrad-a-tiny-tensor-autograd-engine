@@ -505,8 +505,19 @@ def expand_function_backward(ctx, grad_output):
 
     return reshape(grad_output, input_shape)
 
-# Step 33 - permute_function_forward_backward (not yet solved)
-# TODO: implement
+# Step 33 - permute_function_forward_backward
+def permute_function_forward_backward():
+    def forward(ctx, x, order):
+        # Store the axis permutation and reorder the buffer.
+        ctx.order = order
+        return permute(x, order)
+
+    def backward(ctx, grad_output):
+        # Apply the inverse permutation to restore the original axis order.
+        inverse_order = argsort(ctx.order)
+        return permute(grad_output, inverse_order)
+
+    return forward, backward
 
 # Step 34 - Tensor (not yet solved)
 # TODO: implement
