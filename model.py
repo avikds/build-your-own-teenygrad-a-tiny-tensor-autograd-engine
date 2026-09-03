@@ -99,8 +99,29 @@ def e(self, op):
 
 LazyBuffer.e = e
 
-# Step 8 - lazybuffer_binary_e (not yet solved)
-# TODO: implement
+# Step 8 - lazybuffer_binary_e
+def lazybuffer_binary_e(self, op, other):
+    # Apply a binary elementwise op between two LazyBuffers.
+    # The inputs are never mutated.
+    a = self._np
+    b = other._np
+
+    if op.name == "ADD":
+        result = a + b
+    elif op.name == "SUB":
+        result = a - b
+    elif op.name == "MUL":
+        result = a * b
+    elif op.name == "DIV":
+        result = a / b
+    elif op.name == "CMPLT":
+        result = (a < b).astype(np.float32)
+    elif op.name == "MAX":
+        result = np.maximum(a, b)
+    else:
+        raise ValueError(f"Unsupported binary operation: {op}")
+
+    return LazyBuffer(result)
 
 # Step 9 - lazybuffer_r (not yet solved)
 # TODO: implement
