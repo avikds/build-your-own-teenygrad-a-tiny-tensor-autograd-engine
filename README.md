@@ -69,6 +69,15 @@ python scaffold.py
 - [x] **57.** train_mlp
 - [x] **58.** evaluate_mlp
 
----
+## Results
 
-Built on Deep-ML.
+```
+train features shape: (200, 9)
+train labels shape:   (200,)
+first few labels:     [0 1 0 1 1 2 0 2 0 0]
+initial loss:     6.5678671159630175
+initial accuracy: 0.305
+loss[0], loss[-1]: 6.5679 0.013
+loss decreased:    True
+test accuracy:    1.0
+```
