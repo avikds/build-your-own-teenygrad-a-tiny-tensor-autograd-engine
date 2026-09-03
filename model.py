@@ -271,8 +271,25 @@ class Exp(Function):
         _, BinaryOps, _, _ = make_op_enums()
         return lazybuffer_binary_e(grad_output, BinaryOps.MUL, self.ret)
 
-# Step 20 - Sqrt (not yet solved)
-# TODO: implement
+# Step 20 - Sqrt
+class Sqrt(Function):
+    def forward(self, x):
+        # Compute the elementwise square root and cache it for backward.
+        UnaryOps, _, _, _ = make_op_enums()
+        self.ret = x.e(UnaryOps.SQRT)
+        return self.ret
+
+    def backward(self, grad_output):
+        # d/dx sqrt(x) = 1 / (2 * sqrt(x)).
+        _, BinaryOps, _, _ = make_op_enums()
+        two = LazyBuffer.const(2.0, self.ret.shape)
+        denominator = lazybuffer_binary_e(two, BinaryOps.MUL, self.ret)
+        reciprocal = lazybuffer_binary_e(
+            LazyBuffer.const(1.0, self.ret.shape),
+            BinaryOps.DIV,
+            denominator,
+        )
+        return lazybuffer_binary_e(grad_output, BinaryOps.MUL, reciprocal)
 
 # Step 21 - Sigmoid (not yet solved)
 # TODO: implement
