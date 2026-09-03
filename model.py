@@ -670,8 +670,17 @@ def tensor_backward(tensor):
                     grad,
                 )
 
-# Step 40 - bind_unary_tensor_methods (not yet solved)
-# TODO: implement
+# Step 40 - bind_unary_tensor_methods
+def bind_unary_tensor_methods():
+    # Map each unary Tensor operation to its corresponding Function.apply.
+    return {
+        "neg": lambda x: Neg.apply(x),
+        "relu": lambda x: Relu.apply(x),
+        "log": lambda x: Log.apply(x),
+        "exp": lambda x: Exp.apply(x),
+        "sqrt": lambda x: Sqrt.apply(x),
+        "sigmoid": lambda x: Sigmoid.apply(x),
+    }
 
 # Step 41 - broadcasted (not yet solved)
 # TODO: implement
