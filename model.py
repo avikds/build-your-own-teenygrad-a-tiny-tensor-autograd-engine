@@ -682,8 +682,45 @@ def bind_unary_tensor_methods():
         "sigmoid": lambda x: Sigmoid.apply(x),
     }
 
-# Step 41 - broadcasted (not yet solved)
-# TODO: implement
+# Step 41 - broadcasted
+def broadcasted(x, y):
+    # Determine the common broadcast shape using NumPy broadcasting rules.
+    x_shape = x.shape
+    y_shape = y.shape
+
+    max_ndim = max(len(x_shape), len(y_shape))
+
+    x_aligned = (1,) * (max_ndim - len(x_shape)) + tuple(x_shape)
+    y_aligned = (1,) * (max_ndim - len(y_shape)) + tuple(y_shape)
+
+    common_shape = []
+    for xd, yd in zip(x_aligned, y_aligned):
+        if xd == yd:
+            common_shape.append(xd)
+        elif xd == 1:
+            common_shape.append(yd)
+        elif yd == 1:
+            common_shape.append(xd)
+        else:
+            raise ValueError(
+                f"Shapes {x_shape} and {y_shape} are not broadcastable"
+            )
+
+    common_shape = tuple(common_shape)
+
+    # Leave tensors with the correct shape untouched.
+    bx = x
+    by = y
+
+    # Expand through the standalone movement helper so the result
+    # remains a Tensor backed by a new LazyBuffer.
+    if x.shape != common_shape:
+        bx = Tensor(expand(x.data, common_shape), requires_grad=x.requires_grad)
+
+    if y.shape != common_shape:
+        by = Tensor(expand(y.data, common_shape), requires_grad=y.requires_grad)
+
+    return bx, by
 
 # Step 42 - bind_binary_tensor_methods (not yet solved)
 # TODO: implement
