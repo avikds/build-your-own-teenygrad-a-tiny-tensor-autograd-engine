@@ -436,8 +436,31 @@ class Max(Function):
 
         return self.ret
 
-# Step 29 - max_function_backward (not yet solved)
-# TODO: implement
+# Step 29 - max_function_backward
+def backward(self, grad_output):
+    # Route the gradient only to maximum elements.
+    # When multiple elements tie for the maximum, split the gradient evenly.
+    _, BinaryOps, ReduceOps, _ = make_op_enums()
+
+    # mask = 1 where x == max, otherwise 0.
+    less_than_max = lazybuffer_binary_e(self.x, BinaryOps.CMPLT, self.ret)
+    one = LazyBuffer.const(1.0, self.x.shape)
+    mask = lazybuffer_binary_e(one, BinaryOps.SUB, less_than_max)
+
+    # Count how many maximum elements occur in each reduced bucket.
+    count = r(mask, ReduceOps.SUM, self.axis)
+
+    # Expand the upstream gradient and tie count back to the input shape.
+    grad = expand(grad_output, self.x.shape)
+    count = expand(count, self.x.shape)
+
+    # Split the gradient evenly among all tied maximum elements.
+    grad_per_max = lazybuffer_binary_e(grad, BinaryOps.DIV, count)
+
+    return lazybuffer_binary_e(grad_per_max, BinaryOps.MUL, mask)
+
+
+Max.backward = backward
 
 # Step 30 - Reshape (not yet solved)
 # TODO: implement
