@@ -944,8 +944,28 @@ def tensor_matmul_2d(a, b):
     # Sum keeps the reduced dimension: (m, 1, n) -> (m, n).
     return Reshape.apply(summed, shape=(m, n))
 
-# Step 48 - tensor_softmax (not yet solved)
-# TODO: implement
+# Step 48 - tensor_softmax
+def tensor_softmax(x, axis=-1):
+    # Normalize negative axis indices.
+    if axis < 0:
+        axis += len(x.shape)
+
+    # Keep the reduced dimension so broadcasting works naturally.
+    max_val = Max.apply(x, axis=axis)
+
+    # Subtract the maximum for numerical stability.
+    shifted = Sub.apply(x, broadcasted(x, max_val)[1])
+
+    # Exponentiate the stabilized logits.
+    exp_values = Exp.apply(shifted)
+
+    # Sum along the softmax axis, keeping the dimension.
+    total = Sum.apply(exp_values, axis=axis)
+
+    # Divide by the normalization constant.
+    exp_values, total = broadcasted(exp_values, total)
+
+    return Div.apply(exp_values, total)
 
 # Step 49 - tensor_log_softmax (not yet solved)
 # TODO: implement
