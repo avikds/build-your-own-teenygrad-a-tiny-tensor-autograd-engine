@@ -419,8 +419,10 @@ class Sum(Function):
 
         return r(x, ReduceOps.SUM, axis)
 
-# Step 27 - sum_function_backward (not yet solved)
-# TODO: implement
+# Step 27 - sum_function_backward
+def backward(self, grad_output):
+    # Broadcast the summed gradient back to the original input shape.
+    return expand(grad_output, self.input_shape)
 
 # Step 28 - max_function_forward (not yet solved)
 # TODO: implement
