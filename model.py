@@ -459,7 +459,6 @@ def backward(self, grad_output):
 
     return lazybuffer_binary_e(grad_per_max, BinaryOps.MUL, mask)
 
-
 Max.backward = backward
 
 # Step 30 - Reshape (not yet solved)
