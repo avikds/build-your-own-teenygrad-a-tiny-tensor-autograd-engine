@@ -123,8 +123,18 @@ def lazybuffer_binary_e(self, op, other):
 
     return LazyBuffer(result)
 
-# Step 9 - lazybuffer_r (not yet solved)
-# TODO: implement
+# Step 9 - lazybuffer_r
+def r(self, op, axis):
+    # Reduce the underlying array along the given axis,
+    # keeping the reduced dimensions as size 1.
+    if op.name == "SUM":
+        result = np.sum(self._np, axis=axis, keepdims=True)
+    elif op.name == "MAX":
+        result = np.max(self._np, axis=axis, keepdims=True)
+    else:
+        raise ValueError(f"Unsupported reduce operation: {op}")
+
+    return LazyBuffer(result)
 
 # Step 10 - lazybuffer_reshape (not yet solved)
 # TODO: implement
