@@ -696,6 +696,7 @@ def broadcasted(x, y):
     y_aligned = (1,) * (max_ndim - len(y_shape)) + tuple(y_shape)
 
     common_shape = []
+
     for xd, yd in zip(x_aligned, y_aligned):
         if xd == yd:
             common_shape.append(xd)
@@ -710,17 +711,26 @@ def broadcasted(x, y):
 
     common_shape = tuple(common_shape)
 
-    # Leave tensors with the correct shape untouched.
+    # Keep tensors with the common shape unchanged.
     bx = x
     by = y
 
-    # Expand through the standalone movement helper so the result
-    # remains a Tensor backed by a new LazyBuffer.
+    # Construct the differentiable Expand Function locally.
+    Expand = type(
+        "Expand",
+        (Function,),
+        {
+            "forward": expand_function_forward,
+            "backward": expand_function_backward,
+        },
+    )
+
+    # Expand only tensors whose shapes need broadcasting.
     if x.shape != common_shape:
-        bx = Tensor(expand(x.data, common_shape), requires_grad=x.requires_grad)
+        bx = Expand.apply(x, shape=common_shape)
 
     if y.shape != common_shape:
-        by = Tensor(expand(y.data, common_shape), requires_grad=y.requires_grad)
+        by = Expand.apply(y, shape=common_shape)
 
     return bx, by
 
