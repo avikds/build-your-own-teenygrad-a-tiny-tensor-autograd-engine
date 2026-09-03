@@ -1035,8 +1035,33 @@ def sparse_categorical_cross_entropy(logits, labels):
     # Convert the final (1, 1) result into a true scalar Tensor.
     return Reshape.apply(loss, shape=())
 
-# Step 51 - Linear (not yet solved)
-# TODO: implement
+# Step 51 - Linear
+class Linear:
+    # Build a fully connected layer: x @ W + b.
+    def __init__(self, in_features, out_features, seed=None):
+        self.weight = tensor_randn(
+            (in_features, out_features),
+            seed=seed,
+            requires_grad=True,
+        )
+
+        self.bias = tensor_randn(
+            (out_features,),
+            seed=None if seed is None else seed + 1,
+            requires_grad=True,
+        )
+
+    def __call__(self, x):
+        # Compute x @ W.
+        out = tensor_matmul_2d(x, self.weight)
+
+        # Broadcast the bias across the batch dimension and add it.
+        out, bias = broadcasted(out, self.bias)
+        return Add.apply(out, bias)
+
+    def parameters(self):
+        # Return the trainable tensors owned by this layer.
+        return [self.weight, self.bias]
 
 # Step 52 - MLP (not yet solved)
 # TODO: implement
