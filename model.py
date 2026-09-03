@@ -258,8 +258,18 @@ class Log(Function):
         reciprocal = lazybuffer_binary_e(one, BinaryOps.DIV, self.x)
         return lazybuffer_binary_e(grad_output, BinaryOps.MUL, reciprocal)
 
-# Step 19 - Exp (not yet solved)
-# TODO: implement
+# Step 19 - Exp
+class Exp(Function):
+    def forward(self, x):
+        # Compute the elementwise exponential and cache the output.
+        UnaryOps, _, _, _ = make_op_enums()
+        self.ret = x.e(UnaryOps.EXP)
+        return self.ret
+
+    def backward(self, grad_output):
+        # d/dx exp(x) = exp(x), so multiply by the cached output.
+        _, BinaryOps, _, _ = make_op_enums()
+        return lazybuffer_binary_e(grad_output, BinaryOps.MUL, self.ret)
 
 # Step 20 - Sqrt (not yet solved)
 # TODO: implement
