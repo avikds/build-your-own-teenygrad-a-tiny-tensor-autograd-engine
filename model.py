@@ -408,8 +408,16 @@ class Div(Function):
 
         return gx, gy
 
-# Step 26 - sum_function_forward (not yet solved)
-# TODO: implement
+# Step 26 - sum_function_forward
+class Sum(Function):
+    def forward(self, x, axis):
+        # Reduce x with ReduceOps.SUM over axis while keeping the reduced dimension.
+        _, _, ReduceOps, _ = make_op_enums()
+
+        self.input_shape = x.shape
+        self.axis = axis
+
+        return r(x, ReduceOps.SUM, axis)
 
 # Step 27 - sum_function_backward (not yet solved)
 # TODO: implement
