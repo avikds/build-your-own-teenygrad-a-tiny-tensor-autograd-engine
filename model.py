@@ -997,8 +997,43 @@ def tensor_log_softmax(x, axis=-1):
 
     return result
 
-# Step 50 - sparse_categorical_cross_entropy (not yet solved)
-# TODO: implement
+# Step 50 - sparse_categorical_cross_entropy
+def sparse_categorical_cross_entropy(logits, labels):
+    # Accept either a Tensor or ordinary Python / NumPy data.
+    if not isinstance(logits, Tensor):
+        logits = tensor_from_data(logits, requires_grad=False)
+
+    # Compute stable log-probabilities over the class dimension.
+    log_probs = tensor_log_softmax(logits, axis=-1)
+
+    n, c = logits.shape
+
+    # Create a one-hot mask for the provided class labels.
+    one_hot = np.zeros((n, c), dtype=np.float32)
+    for i, label in enumerate(labels):
+        one_hot[i, int(label)] = 1.0
+
+    target_mask = tensor_from_data(one_hot, requires_grad=False)
+
+    # Select the log-probability corresponding to each target class.
+    selected = Mul.apply(log_probs, target_mask)
+
+    # Sum over classes to get one value per sample.
+    per_sample = Sum.apply(selected, axis=1)
+
+    # Sum over the batch.
+    total = Sum.apply(per_sample, axis=0)
+
+    # Divide by the batch size.
+    divisor = tensor_from_data(float(n), requires_grad=False)
+    loss = Div.apply(total, divisor)
+
+    # Negate the mean log-probability.
+    negative_one = tensor_from_data(-1.0, requires_grad=False)
+    loss = Mul.apply(loss, negative_one)
+
+    # Convert the final (1, 1) result into a true scalar Tensor.
+    return Reshape.apply(loss, shape=())
 
 # Step 51 - Linear (not yet solved)
 # TODO: implement
