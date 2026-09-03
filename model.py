@@ -424,8 +424,17 @@ def backward(self, grad_output):
     # Broadcast the summed gradient back to the original input shape.
     return expand(grad_output, self.input_shape)
 
-# Step 28 - max_function_forward (not yet solved)
-# TODO: implement
+# Step 28 - max_function_forward
+class Max(Function):
+    def forward(self, x, axis):
+        # Reduce x with the MAX reduce op along axis and cache values for backward.
+        _, _, ReduceOps, _ = make_op_enums()
+
+        self.x = x
+        self.axis = axis
+        self.ret = r(x, ReduceOps.MAX, axis)
+
+        return self.ret
 
 # Step 29 - max_function_backward (not yet solved)
 # TODO: implement
