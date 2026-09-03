@@ -751,8 +751,43 @@ def bind_binary_tensor_methods():
     Tensor.__mul__ = mul
     Tensor.__truediv__ = div
 
-# Step 43 - bind_movement_tensor_methods (not yet solved)
-# TODO: implement
+# Step 43 - bind_movement_tensor_methods
+def bind_movement_tensor_methods():
+    # Build the differentiable Expand Function.
+    Expand = type(
+        "Expand",
+        (Function,),
+        {
+            "forward": expand_function_forward,
+            "backward": expand_function_backward,
+        },
+    )
+
+    # Build the differentiable Permute Function.
+    permute_forward, permute_backward = permute_function_forward_backward()
+    Permute = type(
+        "Permute",
+        (Function,),
+        {
+            "forward": permute_forward,
+            "backward": permute_backward,
+        },
+    )
+
+    def reshape(self, *args):
+        return Reshape.apply(self, shape=args[0])
+
+    def expand_method(self, *args):
+        return Expand.apply(self, shape=args[0])
+
+    def permute_method(self, *args):
+        return Permute.apply(self, order=args[0])
+
+    return {
+        "reshape": reshape,
+        "expand": expand_method,
+        "permute": permute_method,
+    }
 
 # Step 44 - bind_reduce_tensor_methods (not yet solved)
 # TODO: implement
