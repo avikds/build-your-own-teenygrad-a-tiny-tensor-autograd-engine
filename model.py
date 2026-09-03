@@ -581,8 +581,25 @@ def tensor_creation_helpers():
 
     return zeros_fn, ones_fn, full_fn
 
-# Step 37 - tensor_randn (not yet solved)
-# TODO: implement
+# Step 37 - tensor_randn
+def tensor_randn(shape, seed=None, requires_grad=False):
+    # Generate reproducible uniform samples.
+    uniform = rand(shape, seed=seed)
+
+    # Box-Muller transform: U(0, 1) -> N(0, 1).
+    u = uniform._np
+
+    # Avoid log(0) while preserving the intended [0, 1) distribution.
+    eps = np.finfo(np.float32).tiny
+    u1 = np.maximum(u, eps)
+    u2 = np.random.default_rng(seed).random(shape).astype(np.float32)
+
+    gaussian = (
+        np.sqrt(-2.0 * np.log(u1))
+        * np.cos(2.0 * np.pi * u2)
+    ).astype(np.float32)
+
+    return Tensor(LazyBuffer(gaussian), requires_grad=requires_grad)
 
 # Step 38 - build_topological_order (not yet solved)
 # TODO: implement
