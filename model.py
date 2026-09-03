@@ -1063,8 +1063,36 @@ class Linear:
         # Return the trainable tensors owned by this layer.
         return [self.weight, self.bias]
 
-# Step 52 - MLP (not yet solved)
-# TODO: implement
+# Step 52 - MLP
+class MLP:
+    """Two-layer MLP: Linear -> relu -> Linear."""
+    def __init__(self, in_features, hidden, out_features, seed=None):
+        # Build the two Linear layers.
+        self.layer1 = Linear(in_features, hidden, seed=seed)
+        self.layer2 = Linear(
+            hidden,
+            out_features,
+            seed=None if seed is None else seed + 1,
+        )
+
+        # Get the bound ReLU operation.
+        self._relu = bind_unary_tensor_methods()["relu"]
+
+    def __call__(self, x):
+        # Accept either a Tensor or array-like input.
+        if not isinstance(x, Tensor):
+            x = tensor_from_data(x)
+
+        # Linear -> ReLU -> Linear.
+        x = self.layer1(x)
+        x = self._relu(x)
+        x = self.layer2(x)
+
+        return x
+
+    def parameters(self):
+        # Return all trainable parameters from both layers.
+        return self.layer1.parameters() + self.layer2.parameters()
 
 # Step 53 - sgd_step (not yet solved)
 # TODO: implement
