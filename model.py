@@ -1132,8 +1132,29 @@ def zero_grad(parameters):
 
     return None
 
-# Step 55 - make_toy_digit_dataset (not yet solved)
-# TODO: implement
+# Step 55 - make_toy_digit_dataset
+def make_toy_digit_dataset(num_samples, seed=0):
+    # Define the three flattened 3x3 binary digit prototypes.
+    prototypes = np.array(
+        [
+            [0, 1, 0, 1, 0, 1, 0, 1, 0],
+            [1, 1, 1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 1, 1, 1, 0, 1],
+        ],
+        dtype=np.float32,
+    )
+
+    # Use RandomState so the dataset is reproducible.
+    rng = np.random.RandomState(seed)
+
+    # Draw labels before drawing the noise, as required.
+    y = rng.randint(0, 3, size=num_samples)
+
+    # Generate Gaussian noise and add the corresponding prototype.
+    noise = (0.1 * rng.randn(num_samples, 9)).astype(np.float32)
+    X = prototypes[y] + noise
+
+    return X.astype(np.float32), y.astype(np.int64)
 
 # Step 56 - accuracy (not yet solved)
 # TODO: implement
