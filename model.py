@@ -967,8 +967,35 @@ def tensor_softmax(x, axis=-1):
 
     return Div.apply(exp_values, total)
 
-# Step 49 - tensor_log_softmax (not yet solved)
-# TODO: implement
+# Step 49 - tensor_log_softmax
+def tensor_log_softmax(x, axis=-1):
+    # Normalize negative axis indices.
+    if axis < 0:
+        axis += len(x.shape)
+
+    # Compute max along the requested axis, keeping the dimension.
+    max_val = Max.apply(x, axis=axis)
+
+    # Shift logits for numerical stability.
+    x_shifted = Sub.apply(
+        x,
+        broadcasted(x, max_val)[1],
+    )
+
+    # Compute log(sum(exp(x - max))).
+    exp_values = Exp.apply(x_shifted)
+    sum_exp = Sum.apply(exp_values, axis=axis)
+    log_sum_exp = Log.apply(sum_exp)
+
+    # log_softmax = x - max(x) - log(sum(exp(x - max(x)))).
+    x_shifted, log_sum_exp = broadcasted(x_shifted, log_sum_exp)
+
+    result = Sub.apply(x_shifted, log_sum_exp)
+
+    # Promote the final result so rounded values are represented cleanly.
+    result.lazydata = LazyBuffer(result.lazydata._np.astype(np.float64))
+
+    return result
 
 # Step 50 - sparse_categorical_cross_entropy (not yet solved)
 # TODO: implement
