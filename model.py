@@ -619,8 +619,56 @@ def build_topological_order(tensor):
     dfs(tensor)
     return order
 
-# Step 39 - tensor_backward (not yet solved)
-# TODO: implement
+# Step 39 - tensor_backward
+def tensor_backward(tensor):
+    # Seed the root tensor's gradient with ones.
+    tensor.grad = Tensor(
+        LazyBuffer.const(1.0, tensor.shape),
+        requires_grad=False,
+    )
+
+    # Process the graph in reverse topological order.
+    topo = build_topological_order(tensor)
+    _, BinaryOps, _, _ = make_op_enums()
+
+    for node in reversed(topo):
+        if node._ctx is None or node.grad is None:
+            continue
+
+        grads = node._ctx.backward(node.grad.data)
+
+        if grads is None:
+            continue
+
+        if not isinstance(grads, tuple):
+            grads = (grads,)
+
+        parents = node._ctx.parents
+
+        # Handle both possible parent layouts:
+        # 1. parents contains every input
+        # 2. parents contains only inputs requiring gradients
+        if len(parents) == len(grads):
+            parent_grads = zip(parents, grads)
+        else:
+            parent_grads = zip(
+                (p for p in parents if p.requires_grad),
+                (g for g in grads if g is not None),
+            )
+
+        for parent, grad in parent_grads:
+            # Never populate .grad for tensors that do not require it.
+            if not parent.requires_grad or grad is None:
+                continue
+
+            if parent.grad is None:
+                parent.grad = Tensor(grad, requires_grad=False)
+            else:
+                parent.grad.data = lazybuffer_binary_e(
+                    parent.grad.data,
+                    BinaryOps.ADD,
+                    grad,
+                )
 
 # Step 40 - bind_unary_tensor_methods (not yet solved)
 # TODO: implement
