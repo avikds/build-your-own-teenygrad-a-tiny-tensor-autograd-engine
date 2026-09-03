@@ -472,8 +472,13 @@ class Reshape(Function):
         # Reshape the incoming gradient back to the original input shape.
         return reshape(grad_output, self.input_shape)
 
-# Step 31 - expand_function_forward (not yet solved)
-# TODO: implement
+# Step 31 - expand_function_forward
+def expand_function_forward(ctx, x, shape):
+    # Cache the original input shape for the backward pass.
+    ctx.input_shape = x.shape
+
+    # Delegate broadcasting to the standalone expand helper.
+    return expand(x, shape)
 
 # Step 32 - expand_function_backward (not yet solved)
 # TODO: implement
