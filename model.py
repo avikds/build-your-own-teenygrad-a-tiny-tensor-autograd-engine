@@ -846,8 +846,46 @@ def bind_reduce_tensor_methods():
     Tensor.sum = sum_method
     Tensor.max = max_method
 
-# Step 45 - tensor_mean (not yet solved)
-# TODO: implement
+# Step 45 - tensor_mean
+def tensor_mean(x, axis=None, keepdim=False):
+    # Normalize the reduction axes.
+    if axis is None:
+        axes = tuple(range(len(x.shape)))
+        reduce_axis = None
+    elif isinstance(axis, int):
+        normalized = axis + len(x.shape) if axis < 0 else axis
+        axes = (normalized,)
+        reduce_axis = normalized
+    else:
+        axes = tuple(
+            a + len(x.shape) if a < 0 else a
+            for a in axis
+        )
+        reduce_axis = axes
+
+    # Perform the differentiable sum reduction.
+    summed = Sum.apply(x, axis=reduce_axis)
+
+    # Number of elements reduced.
+    count = 1
+    for ax in axes:
+        count *= x.shape[ax]
+
+    # Remove reduced dimensions when keepdim=False.
+    if not keepdim:
+        result_shape = tuple(
+            dim for i, dim in enumerate(x.shape)
+            if i not in set(axes)
+        )
+        summed = Reshape.apply(summed, shape=result_shape)
+
+    # Divide by the number of reduced elements.
+    divisor = Tensor(
+        LazyBuffer.const(float(count), summed.shape),
+        requires_grad=False,
+    )
+
+    return Div.apply(summed, divisor)
 
 # Step 46 - tensor_transpose (not yet solved)
 # TODO: implement
