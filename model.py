@@ -20,8 +20,37 @@ def argsort(values):
     # Python's sorted() is stable, preserving the original order of equal elements.
     return sorted(range(len(values)), key=lambda i: values[i])
 
-# Step 3 - make_op_enums (not yet solved)
-# TODO: implement
+# Step 3 - make_op_enums
+from enum import Enum, auto
+
+def make_op_enums():
+    # Create four enum classes naming every supported operation kind.
+    class UnaryOps(Enum):
+        NEG = auto()
+        RELU = auto()
+        LOG = auto()
+        EXP = auto()
+        SQRT = auto()
+        SIGMOID = auto()
+
+    class BinaryOps(Enum):
+        ADD = auto()
+        SUB = auto()
+        MUL = auto()
+        DIV = auto()
+        CMPLT = auto()
+        MAX = auto()
+
+    class ReduceOps(Enum):
+        SUM = auto()
+        MAX = auto()
+
+    class MovementOps(Enum):
+        RESHAPE = auto()
+        EXPAND = auto()
+        PERMUTE = auto()
+
+    return UnaryOps, BinaryOps, ReduceOps, MovementOps
 
 # Step 4 - LazyBuffer (not yet solved)
 # TODO: implement
