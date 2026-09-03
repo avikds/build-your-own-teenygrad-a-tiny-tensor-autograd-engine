@@ -480,8 +480,30 @@ def expand_function_forward(ctx, x, shape):
     # Delegate broadcasting to the standalone expand helper.
     return expand(x, shape)
 
-# Step 32 - expand_function_backward (not yet solved)
-# TODO: implement
+# Step 32 - expand_function_backward
+def expand_function_backward(ctx, grad_output):
+    # Sum the incoming gradient over the axes that were broadcast.
+    input_shape = ctx.input_shape
+    output_shape = grad_output.shape
+
+    # Align the input shape to the right side of the output shape.
+    ndim_diff = len(output_shape) - len(input_shape)
+    aligned_input_shape = (1,) * ndim_diff + tuple(input_shape)
+
+    # Reduce every axis that was introduced or expanded from size 1.
+    axes = tuple(
+        i
+        for i, (in_dim, out_dim) in enumerate(
+            zip(aligned_input_shape, output_shape)
+        )
+        if in_dim == 1 and out_dim != 1
+    )
+
+    if axes:
+        _, _, ReduceOps, _ = make_op_enums()
+        grad_output = r(grad_output, ReduceOps.SUM, axes)
+
+    return reshape(grad_output, input_shape)
 
 # Step 33 - permute_function_forward_backward (not yet solved)
 # TODO: implement
