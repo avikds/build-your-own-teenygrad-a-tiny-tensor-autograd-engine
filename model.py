@@ -789,8 +789,62 @@ def bind_movement_tensor_methods():
         "permute": permute_method,
     }
 
-# Step 44 - bind_reduce_tensor_methods (not yet solved)
-# TODO: implement
+# Step 44 - bind_reduce_tensor_methods
+def bind_reduce_tensor_methods():
+    def normalize_axis(axis, ndim):
+        if axis is None:
+            return tuple(range(ndim))
+
+        if isinstance(axis, int):
+            axis = (axis,)
+
+        return tuple(a + ndim if a < 0 else a for a in axis)
+
+    def reduced_shape(shape, axes):
+        axes = set(axes)
+        return tuple(
+            dim for i, dim in enumerate(shape)
+            if i not in axes
+        )
+
+    def sum_method(self, axis=None, keepdim=False):
+        axes = normalize_axis(axis, len(self.shape))
+
+        if axis is None:
+            reduce_axis = None
+        elif len(axes) == 1:
+            reduce_axis = axes[0]
+        else:
+            reduce_axis = axes
+
+        out = Sum.apply(self, axis=reduce_axis)
+
+        if not keepdim:
+            new_shape = reduced_shape(out.shape, axes)
+            out = Reshape.apply(out, shape=new_shape)
+
+        return out
+
+    def max_method(self, axis=None, keepdim=False):
+        axes = normalize_axis(axis, len(self.shape))
+
+        if axis is None:
+            reduce_axis = None
+        elif len(axes) == 1:
+            reduce_axis = axes[0]
+        else:
+            reduce_axis = axes
+
+        out = Max.apply(self, axis=reduce_axis)
+
+        if not keepdim:
+            new_shape = reduced_shape(out.shape, axes)
+            out = Reshape.apply(out, shape=new_shape)
+
+        return out
+
+    Tensor.sum = sum_method
+    Tensor.max = max_method
 
 # Step 45 - tensor_mean (not yet solved)
 # TODO: implement
