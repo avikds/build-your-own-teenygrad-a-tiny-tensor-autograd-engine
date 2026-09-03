@@ -178,8 +178,17 @@ class Function:
                 if need is True
             )
 
-# Step 14 - function_forward_backward_stubs (not yet solved)
-# TODO: implement
+# Step 14 - function_forward_backward_stubs
+def function_forward_backward_stubs():
+    # Attach base forward and backward methods to Function.
+    def forward(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def backward(self, *args, **kwargs):
+        raise NotImplementedError
+
+    Function.forward = forward
+    Function.backward = backward
 
 # Step 15 - apply (not yet solved)
 # TODO: implement
