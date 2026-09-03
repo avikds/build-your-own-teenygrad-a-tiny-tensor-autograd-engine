@@ -1094,8 +1094,35 @@ class MLP:
         # Return all trainable parameters from both layers.
         return self.layer1.parameters() + self.layer2.parameters()
 
-# Step 53 - sgd_step (not yet solved)
-# TODO: implement
+# Step 53 - sgd_step
+def sgd_step(parameters, learning_rate):
+    # Update each parameter in place using its gradient.
+    _, BinaryOps, _, _ = make_op_enums()
+
+    for parameter in parameters:
+        if parameter.grad is None:
+            continue
+
+        lr = LazyBuffer.const(
+            float(learning_rate),
+            parameter.shape,
+        )
+
+        scaled_grad = lazybuffer_binary_e(
+            parameter.grad.data,
+            BinaryOps.MUL,
+            lr,
+        )
+
+        updated = lazybuffer_binary_e(
+            parameter.data,
+            BinaryOps.SUB,
+            scaled_grad,
+        )
+
+        parameter.data = updated
+
+    return None
 
 # Step 54 - zero_grad (not yet solved)
 # TODO: implement
