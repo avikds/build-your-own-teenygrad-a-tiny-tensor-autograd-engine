@@ -521,25 +521,22 @@ def permute_function_forward_backward():
 
 # Step 34 - Tensor
 class Tensor:
-    def __init__(self, data, requires_grad=False):
-        # Reuse an existing LazyBuffer or wrap the incoming data in one.
+    def __init__(self, data, requires_grad=False, _ctx=None):
+        # Reuse an existing LazyBuffer or wrap the input data.
         self.lazydata = data if isinstance(data, LazyBuffer) else LazyBuffer(
             np.asarray(data, dtype=np.float32)
         )
 
-        # Store autograd bookkeeping.
         self.requires_grad = requires_grad
         self.grad = None
-        self._ctx = None
+        self._ctx = _ctx
 
     @property
     def data(self):
-        # Return the underlying LazyBuffer.
         return self.lazydata
 
     @data.setter
     def data(self, value):
-        # Replace the underlying LazyBuffer.
         self.lazydata = value if isinstance(value, LazyBuffer) else LazyBuffer(
             np.asarray(value, dtype=np.float32)
         )
@@ -601,8 +598,26 @@ def tensor_randn(shape, seed=None, requires_grad=False):
 
     return Tensor(LazyBuffer(gaussian), requires_grad=requires_grad)
 
-# Step 38 - build_topological_order (not yet solved)
-# TODO: implement
+# Step 38 - build_topological_order
+def build_topological_order(tensor):
+    # DFS through the computation graph, adding each node after its parents.
+    visited = set()
+    order = []
+
+    def dfs(node):
+        if id(node) in visited:
+            return
+
+        visited.add(id(node))
+
+        if node._ctx is not None:
+            for parent in getattr(node._ctx, "parents", ()):
+                dfs(parent)
+
+        order.append(node)
+
+    dfs(tensor)
+    return order
 
 # Step 39 - tensor_backward (not yet solved)
 # TODO: implement
