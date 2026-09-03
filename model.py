@@ -14,8 +14,11 @@ def prod(shape):
         result *= dim
     return result
 
-# Step 2 - argsort (not yet solved)
-# TODO: implement
+# Step 2 - argsort
+def argsort(values):
+    # Return the indices that would sort values in ascending order.
+    # Python's sorted() is stable, preserving the original order of equal elements.
+    return sorted(range(len(values)), key=lambda i: values[i])
 
 # Step 3 - make_op_enums (not yet solved)
 # TODO: implement
