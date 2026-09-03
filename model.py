@@ -347,8 +347,33 @@ class Sub(Function):
 
         return gx, gy
 
-# Step 24 - Mul (not yet solved)
-# TODO: implement
+# Step 24 - Mul
+class Mul(Function):
+    def forward(self, x, y):
+        # Compute the elementwise product and save inputs for backward.
+        _, BinaryOps, _, _ = make_op_enums()
+        self.x = x
+        self.y = y
+        return lazybuffer_binary_e(x, BinaryOps.MUL, y)
+
+    def backward(self, grad_output):
+        # d(x * y)/dx = y
+        # d(x * y)/dy = x
+        _, BinaryOps, _, _ = make_op_enums()
+
+        gx = (
+            lazybuffer_binary_e(grad_output, BinaryOps.MUL, self.y)
+            if self.needs_input_grad[0]
+            else None
+        )
+
+        gy = (
+            lazybuffer_binary_e(grad_output, BinaryOps.MUL, self.x)
+            if self.needs_input_grad[1]
+            else None
+        )
+
+        return gx, gy
 
 # Step 25 - Div (not yet solved)
 # TODO: implement
