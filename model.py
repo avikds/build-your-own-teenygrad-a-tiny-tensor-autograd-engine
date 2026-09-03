@@ -330,8 +330,22 @@ class Add(Function):
         gy = grad_output if self.needs_input_grad[1] else None
         return gx, gy
 
-# Step 23 - Sub (not yet solved)
-# TODO: implement
+# Step 23 - Sub
+class Sub(Function):
+    def forward(self, x, y):
+        # Return the elementwise difference x - y as a LazyBuffer.
+        _, BinaryOps, _, _ = make_op_enums()
+        return lazybuffer_binary_e(x, BinaryOps.SUB, y)
+
+    def backward(self, grad_output):
+        # d(x - y)/dx = 1
+        # d(x - y)/dy = -1
+        UnaryOps, _, _, _ = make_op_enums()
+
+        gx = grad_output if self.needs_input_grad[0] else None
+        gy = grad_output.e(UnaryOps.NEG) if self.needs_input_grad[1] else None
+
+        return gx, gy
 
 # Step 24 - Mul (not yet solved)
 # TODO: implement
