@@ -228,8 +228,20 @@ class Neg(Function):
         UnaryOps, _, _, _ = make_op_enums()
         return grad_output.e(UnaryOps.NEG)
 
-# Step 17 - Relu (not yet solved)
-# TODO: implement
+# Step 17 - Relu
+class Relu(Function):
+    def forward(self, x):
+        # Apply ReLU and cache the result for the backward pass.
+        UnaryOps, _, _, _ = make_op_enums()
+        self.ret = x.e(UnaryOps.RELU)
+        return self.ret
+
+    def backward(self, grad_output):
+        # Pass the gradient only where the ReLU output is positive.
+        _, BinaryOps, _, _ = make_op_enums()
+        zero = LazyBuffer.const(0.0, self.ret.shape)
+        mask = lazybuffer_binary_e(zero, BinaryOps.CMPLT, self.ret)
+        return lazybuffer_binary_e(grad_output, BinaryOps.MUL, mask)
 
 # Step 18 - Log (not yet solved)
 # TODO: implement
