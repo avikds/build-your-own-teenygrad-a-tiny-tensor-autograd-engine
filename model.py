@@ -1124,8 +1124,13 @@ def sgd_step(parameters, learning_rate):
 
     return None
 
-# Step 54 - zero_grad (not yet solved)
-# TODO: implement
+# Step 54 - zero_grad
+def zero_grad(parameters):
+    # Reset each parameter's gradient so the next backward pass starts fresh.
+    for parameter in parameters:
+        parameter.grad = None
+
+    return None
 
 # Step 55 - make_toy_digit_dataset (not yet solved)
 # TODO: implement
