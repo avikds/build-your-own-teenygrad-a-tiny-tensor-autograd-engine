@@ -905,8 +905,44 @@ def tensor_transpose(x, ax1=-2, ax2=-1):
     permute_fn = bind_movement_tensor_methods()["permute"]
     return permute_fn(x, tuple(order))
 
-# Step 47 - tensor_matmul_2d (not yet solved)
-# TODO: implement
+# Step 47 - tensor_matmul_2d
+def tensor_matmul_2d(a, b):
+    # a: (m, k), b: (k, n)
+    m, k = a.shape
+    k2, n = b.shape
+
+    if k != k2:
+        raise ValueError(
+            f"Incompatible shapes for matmul: {a.shape} and {b.shape}"
+        )
+
+    # Build the (m, k, n) representations.
+    a_reshaped = Reshape.apply(a, shape=(m, k, 1))
+    b_reshaped = Reshape.apply(b, shape=(1, k, n))
+
+    # Broadcast both operands to (m, k, n).
+    _, broadcasted_b = broadcasted(
+        a_reshaped,
+        b_reshaped,
+    )
+
+    # The helper above may leave the first operand unchanged only if the
+    # shapes already match, so explicitly align both to the common shape.
+    a_expanded = Tensor(
+        expand(a_reshaped.data, (m, k, n)),
+        requires_grad=a.requires_grad,
+    )
+    b_expanded = Tensor(
+        expand(b_reshaped.data, (m, k, n)),
+        requires_grad=b.requires_grad,
+    )
+
+    # Elementwise product followed by reduction over k.
+    product = Mul.apply(a_expanded, b_expanded)
+    summed = Sum.apply(product, axis=1)
+
+    # Sum keeps the reduced dimension: (m, 1, n) -> (m, n).
+    return Reshape.apply(summed, shape=(m, n))
 
 # Step 48 - tensor_softmax (not yet solved)
 # TODO: implement
