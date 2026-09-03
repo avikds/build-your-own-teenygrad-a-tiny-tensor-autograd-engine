@@ -424,6 +424,8 @@ def backward(self, grad_output):
     # Broadcast the summed gradient back to the original input shape.
     return expand(grad_output, self.input_shape)
 
+Sum.backward = backward
+
 # Step 28 - max_function_forward
 class Max(Function):
     def forward(self, x, axis):
@@ -1170,8 +1172,48 @@ def accuracy(logits, labels):
     # Return the fraction of correct predictions as a Python float.
     return float(np.mean(predictions == np.asarray(labels)))
 
-# Step 57 - train_mlp (not yet solved)
-# TODO: implement
+# Step 57 - train_mlp
+def train_mlp(X, y, epochs=50, learning_rate=0.1, hidden=16, seed=0):
+    # Convert the training data to arrays so shapes and class counts are available.
+    X = np.asarray(X, dtype=np.float32)
+    y = np.asarray(y, dtype=np.int64)
+
+    # Infer the input dimension and number of output classes from the data.
+    in_features = X.shape[1]
+    out_features = int(np.max(y)) + 1
+
+    # Build the model.
+    model = MLP(
+        in_features,
+        hidden,
+        out_features,
+        seed=seed,
+    )
+
+    parameters = model.parameters()
+    loss_history = []
+
+    # Full-batch gradient descent.
+    for _ in range(epochs):
+        # Clear gradients from the previous iteration.
+        zero_grad(parameters)
+
+        # Forward pass.
+        logits = model(X)
+
+        # Compute the classification loss.
+        loss = sparse_categorical_cross_entropy(logits, y)
+
+        # Record the scalar loss value.
+        loss_history.append(float(loss.numpy()))
+
+        # Reverse-mode autodiff.
+        tensor_backward(loss)
+
+        # Update model parameters.
+        sgd_step(parameters, learning_rate)
+
+    return model, loss_history
 
 # Step 58 - evaluate_mlp (not yet solved)
 # TODO: implement
