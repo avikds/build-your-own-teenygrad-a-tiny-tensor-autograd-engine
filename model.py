@@ -887,8 +887,23 @@ def tensor_mean(x, axis=None, keepdim=False):
 
     return Div.apply(summed, divisor)
 
-# Step 46 - tensor_transpose (not yet solved)
-# TODO: implement
+# Step 46 - tensor_transpose
+def tensor_transpose(x, ax1=-2, ax2=-1):
+    # Resolve negative axes relative to the tensor's number of dimensions.
+    ndim = len(x.shape)
+
+    if ax1 < 0:
+        ax1 += ndim
+    if ax2 < 0:
+        ax2 += ndim
+
+    # Build the permutation that swaps the two requested axes.
+    order = list(range(ndim))
+    order[ax1], order[ax2] = order[ax2], order[ax1]
+
+    # Reuse the existing differentiable permute machinery.
+    permute_fn = bind_movement_tensor_methods()["permute"]
+    return permute_fn(x, tuple(order))
 
 # Step 47 - tensor_matmul_2d (not yet solved)
 # TODO: implement
