@@ -1215,6 +1215,14 @@ def train_mlp(X, y, epochs=50, learning_rate=0.1, hidden=16, seed=0):
 
     return model, loss_history
 
-# Step 58 - evaluate_mlp (not yet solved)
-# TODO: implement
+# Step 58 - evaluate_mlp
+def evaluate_mlp(model, X_test, y_test):
+    # Wrap the held-out features in a Tensor.
+    X_test = tensor_from_data(X_test, requires_grad=False)
+
+    # Run the trained model forward.
+    logits = model(X_test)
+
+    # Return the classification accuracy.
+    return accuracy(logits, y_test)
 
