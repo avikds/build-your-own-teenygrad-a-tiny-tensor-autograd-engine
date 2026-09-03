@@ -519,8 +519,41 @@ def permute_function_forward_backward():
 
     return forward, backward
 
-# Step 34 - Tensor (not yet solved)
-# TODO: implement
+# Step 34 - Tensor
+class Tensor:
+    def __init__(self, data, requires_grad=False):
+        # Reuse an existing LazyBuffer or wrap the incoming data in one.
+        self.lazydata = data if isinstance(data, LazyBuffer) else LazyBuffer(
+            np.asarray(data, dtype=np.float32)
+        )
+
+        # Store autograd bookkeeping.
+        self.requires_grad = requires_grad
+        self.grad = None
+        self._ctx = None
+
+    @property
+    def data(self):
+        # Return the underlying LazyBuffer.
+        return self.lazydata
+
+    @data.setter
+    def data(self, value):
+        # Replace the underlying LazyBuffer.
+        self.lazydata = value if isinstance(value, LazyBuffer) else LazyBuffer(
+            np.asarray(value, dtype=np.float32)
+        )
+
+    @property
+    def shape(self):
+        return self.lazydata.shape
+
+    @property
+    def dtype(self):
+        return self.lazydata.dtype
+
+    def numpy(self):
+        return self.lazydata._np
 
 # Step 35 - tensor_from_data (not yet solved)
 # TODO: implement
